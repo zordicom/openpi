@@ -57,8 +57,6 @@ class GalaxeaInputs(transforms.DataTransformFn):
 
         # Use top view as base image
         for name in self.EXPECTED_CAMERAS:
-            if in_images[name].shape != (3, 224, 224):
-                raise ValueError(f"Expected image {name} to be [3, 224, 224], got {in_images[name].shape}")
             images[name] = in_images[name]
             image_masks[name] = np.True_
 
@@ -74,7 +72,9 @@ class GalaxeaInputs(transforms.DataTransformFn):
             inputs["actions"] = transforms.pad_to_dim(actions, self.action_dim)
 
         if "prompt" in data:
-            inputs["prompt"] = data["prompt"]
+            inputs["prompt"] = str(data["prompt"])
+        else:
+            inputs["prompt"] = "fold the towel"
 
         return inputs
 

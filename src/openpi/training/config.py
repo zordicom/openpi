@@ -346,21 +346,22 @@ class LeRobotGalaxeaDataConfig(DataConfigFactory):
             inputs=[
                 _transforms.RepackTransform(
                     {
-                        # Map top-level observation structure to expected nested structure
+                        # Map dataset columns to expected structure
                         "images": {
-                            "cam_high": "observation.images.static_rs415_top",
-                            "cam_left_wrist": "observation.images.eoat_rs405_left_top",
-                            "cam_right_wrist": "observation.images.eoat_rs405_right_top",
+                            "base_0_rgb": "base_0_rgb",
+                            "left_wrist_0_rgb": "left_wrist_0_rgb",
+                            "right_wrist_0_rgb": "right_wrist_0_rgb",
                         },
-                        "state": "observation.state",
-                        "actions": "action",
+                        "state": "state",
+                        "actions": "actions",
                     }
                 )
             ]
         )
     )
+
     # Action keys that will be used to read the action sequence from the dataset.
-    action_sequence_keys: Sequence[str] = ("action",)
+    action_sequence_keys: Sequence[str] = ("actions",)
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
