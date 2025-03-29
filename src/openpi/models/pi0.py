@@ -82,7 +82,9 @@ class Pi0Config(_model.BaseModelConfig):
 
     @override
     def create(self, rng: at.KeyArrayLike) -> "Pi0":
-        return Pi0(self, rngs=nnx.Rngs(rng))
+        # Convert the KeyArrayLike to a proper RngValue for nnx.Rngs
+        key = rng if isinstance(rng, jax.Array) else jax.random.key(0) if rng is None else jax.random.key(rng)
+        return Pi0(self, rngs=nnx.Rngs(default=key))
 
     @override
     def inputs_spec(self, *, batch_size: int = 1) -> tuple[_model.Observation, _model.Actions]:

@@ -5,6 +5,7 @@ from collections.abc import Sequence
 import dataclasses
 import difflib
 import logging
+import os
 import pathlib
 from typing import Any, Protocol, TypeAlias
 
@@ -62,6 +63,7 @@ class AssetsConfig:
 class DataConfig:
     # LeRobot repo id. If None, fake data will be created.
     repo_id: str | None = None
+    root: str | None = None
     # Directory within the assets directory containing the data assets.
     asset_id: str | None = None
     # Contains precomputed normalization stats. If None, normalization will not be performed.
@@ -138,6 +140,7 @@ class ModelTransformFactory(GroupFactory):
 class DataConfigFactory(abc.ABC):
     # The LeRobot repo id.
     repo_id: str = tyro.MISSING
+    root: str | None = None
     # Determines how the assets will be loaded.
     assets: AssetsConfig = dataclasses.field(default_factory=AssetsConfig)
     # Base config that will be updated by the factory.
@@ -153,6 +156,7 @@ class DataConfigFactory(abc.ABC):
         return dataclasses.replace(
             self.base_config or DataConfig(),
             repo_id=repo_id,
+            root=self.root,
             asset_id=asset_id,
             norm_stats=self._load_norm_stats(epath.Path(self.assets.assets_dir or assets_dirs), asset_id),
         )
@@ -173,10 +177,11 @@ class DataConfigFactory(abc.ABC):
 @dataclasses.dataclass(frozen=True)
 class FakeDataConfig(DataConfigFactory):
     repo_id: str = "fake"
+    root: str | None = None
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        return DataConfig(repo_id=self.repo_id)
+        return DataConfig(repo_id=self.repo_id, root=self.root)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -320,6 +325,74 @@ class LeRobotLiberoDataConfig(DataConfigFactory):
             repack_transforms=repack_transform,
             data_transforms=data_transforms,
             model_transforms=model_transforms,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotGalaxeaDataConfig(DataConfigFactory):
+    """
+    Data configuration for the Galaxea robot with custom camera setup for towel folding.
+    """
+
+    # If true, will convert joint dimensions to deltas with respect to the current state before passing to the model.
+    # Gripper dimensions will remain in absolute values.
+    use_delta_joint_actions: bool = True
+    # If provided, will be injected into the input data if the "prompt" key is not present.
+    default_prompt: str | None = "fold the towel"
+
+    # Repack transforms.
+    repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
+        default=_transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        # Map top-level observation structure to expected nested structure
+                        "images": {
+                            "cam_high": "observation.images.static_rs415_top",
+                            "cam_left_wrist": "observation.images.eoat_rs405_left_top",
+                            "cam_right_wrist": "observation.images.eoat_rs405_right_top",
+                        },
+                        "state": "observation.state",
+                        "actions": "action",
+                    }
+                )
+            ]
+        )
+    )
+    # Action keys that will be used to read the action sequence from the dataset.
+    action_sequence_keys: Sequence[str] = ("action",)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        # Import here to avoid circular import
+        import openpi.policies.galaxea_policy as galaxea_policy
+
+        data_transforms = _transforms.Group(
+            inputs=[galaxea_policy.GalaxeaInputs(action_dim=model_config.action_dim)],
+            outputs=[galaxea_policy.GalaxeaOutputs()],
+        )
+
+        if self.use_delta_joint_actions:
+            # Apply delta transform to joints (first 12 values) but not grippers (last 2 values)
+            delta_action_mask = _transforms.make_bool_mask(6, -1, 6, -1)
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
+
+        # Create base config and set local_files_only in it
+        base_config = self.create_base_config(assets_dirs)
+        base_config = dataclasses.replace(base_config, local_files_only=True)
+
+        return dataclasses.replace(
+            base_config,
+            repack_transforms=self.repack_transforms,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
+            prompt_from_task=True,
         )
 
 
@@ -579,8 +652,8 @@ _CONFIGS = [
     #
     # Fine-tuning Aloha configs.
     #
-    # This is a test config that is used to illustate how train on a custom LeRobot dataset.
-    # For instuctions on how to convert and train on your own Aloha dataset see examples/aloha_real/README.md
+    # This is a test config that is used to illustrate how train on a custom LeRobot dataset.
+    # For instructions on how to convert and train on your own Aloha dataset see examples/aloha_real/README.md
     TrainConfig(
         name="pi0_aloha_pen_uncap",
         model=pi0.Pi0Config(),
@@ -624,6 +697,40 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
         num_train_steps=20_000,
+    ),
+    # Custom config for Galaxea dataset
+    TrainConfig(
+        name="pi0_galaxea",
+        exp_name="galaxea_towel_folding",
+        model=pi0.Pi0Config(
+            # Use LoRA for fine-tuning
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "s3://openpi-assets/checkpoints/pi0_base/params",
+        ),
+        # Turn off EMA for LoRA fine-tuning
+        ema_decay=None,
+        # Use the freeze filter from the model config for LoRA
+        freeze_filter=pi0.Pi0Config(
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        data=LeRobotGalaxeaDataConfig(
+            repo_id="zordicom/galaxea_towel_folding",
+            root=os.environ["DATASET_PATH"],  # Use absolute path to local dataset
+            default_prompt="fold the towel",
+            use_delta_joint_actions=True,
+            # local_files_only is now set in the create() method
+        ),
+        batch_size=16,
+        num_workers=4,
+        num_train_steps=50_000,
+        log_interval=100,
+        save_interval=500,
+        keep_period=1000,
+        wandb_enabled=True,
     ),
     #
     # Debugging configs.
