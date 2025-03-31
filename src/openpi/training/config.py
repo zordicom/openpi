@@ -727,7 +727,7 @@ _CONFIGS = [
         ),
         batch_size=16,
         num_workers=4,
-        num_train_steps=50_000,
+        num_train_steps=50_001,
         log_interval=100,
         save_interval=500,
         keep_period=1000,

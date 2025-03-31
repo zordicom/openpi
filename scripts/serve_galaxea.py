@@ -12,6 +12,8 @@ from scripts.serve_policy import EnvMode
 
 logging.basicConfig(level=logging.INFO, force=True)
 
+CHECKPOINT_PATH = "checkpoints/pi0_galaxea/galaxea_towel_folding/48000"
+
 
 def main():
     """Create and serve the Galaxea policy."""
@@ -26,7 +28,7 @@ def main():
     policy_conf = _config.get_config("pi0_galaxea")
     policy = _policy_config.create_trained_policy(
         policy_conf,
-        "checkpoints/pi0_galaxea/galaxea_towel_folding/39000",
+        CHECKPOINT_PATH,
         default_prompt=args.default_prompt,
     )
     policy_metadata = policy.metadata
