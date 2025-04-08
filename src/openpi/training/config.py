@@ -348,12 +348,12 @@ class LeRobotGalaxeaDataConfig(DataConfigFactory):
                     {
                         # Map dataset columns to expected structure
                         "images": {
-                            "base_0_rgb": "base_0_rgb",
-                            "left_wrist_0_rgb": "left_wrist_0_rgb",
-                            "right_wrist_0_rgb": "right_wrist_0_rgb",
+                            "base_0_rgb": "observation.images.static_top",
+                            "left_wrist_0_rgb": "observation.images.eoat_left_top",
+                            "right_wrist_0_rgb": "observation.images.eoat_right_top",
                         },
-                        "state": "state",
-                        "actions": "actions",
+                        "state": "observation.state",
+                        "actions": "action",
                     }
                 )
             ]
@@ -361,7 +361,7 @@ class LeRobotGalaxeaDataConfig(DataConfigFactory):
     )
 
     # Action keys that will be used to read the action sequence from the dataset.
-    action_sequence_keys: Sequence[str] = ("actions",)
+    action_sequence_keys: Sequence[str] = ("action",)
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
