@@ -3,16 +3,17 @@
 
 import logging
 
+from serve_policy import Args
+from serve_policy import EnvMode
+
 from openpi.policies import policy as _policy
 from openpi.policies import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
 from openpi.training import config as _config
-from scripts.serve_policy import Args
-from scripts.serve_policy import EnvMode
 
 logging.basicConfig(level=logging.INFO, force=True)
 
-CHECKPOINT_PATH = "checkpoints/pi0_galaxea/galaxea_towel_folding/48000"
+CHECKPOINT_PATH = "../checkpoints/pi0_galaxea/galaxea_towel_folding/17500"
 
 
 def main():
