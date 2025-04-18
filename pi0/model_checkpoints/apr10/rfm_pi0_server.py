@@ -5,12 +5,12 @@ WebSocket server for Pi0 prediction model.
 """
 
 import asyncio
+import io
 import os
 import pickle
 import time
 from typing import Any
 
-import cv2
 import numpy as np
 from rfm_pi0_model import Pi0Model
 from rfm_websocket_manager import WebSocketServer
@@ -89,14 +89,9 @@ class Pi0Server:
             ValueError: If image decoding fails
         """
         try:
-            # Decode the binary data to an image
-            nparr = np.frombuffer(binary_data, np.uint8)
-            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-            # OpenCV reads as BGR, convert to RGB
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-            return img
+            buf = io.BytesIO(binary_data)
+            buf.seek(0)
+            return np.load(buf)
         except Exception as e:
             print(f"[ERROR] Binary image decoding failed: {e}")
             raise ValueError(f"Failed to decode binary image: {e}") from e

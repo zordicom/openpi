@@ -4,6 +4,7 @@ Copyright 2025 Zordi, Inc. All rights reserved.
 WebSocket client for Pi0 prediction service.
 """
 
+import io
 import logging
 import time
 
@@ -50,7 +51,7 @@ def encode_image_binary(image: np.ndarray) -> bytes:
     """Encode image to binary format.
 
     Args:
-        image: Image array of shape (H, W, C)
+        image: Image array of shape (H, W, C) or (C, H, W)
 
     Returns:
         bytes: Binary encoded image
@@ -58,12 +59,16 @@ def encode_image_binary(image: np.ndarray) -> bytes:
     if image.ndim != 3:
         raise ValueError("Color image must have 3 dimensions")
 
-    # Ensure image is in BGR format for OpenCV
-    image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) if image.shape[2] == 3 else image
+    if image.shape[0] == 3:
+        # Convert to numpy and rearrange dimensions
+        # (C, H, W) -> (H, W, C)
+        image = np.transpose(image, (1, 2, 0))
 
-    # Encode to JPEG
-    _, buffer = cv2.imencode(".jpg", image_bgr, [cv2.IMWRITE_JPEG_QUALITY, 90])
-    return buffer.tobytes()
+    # Serialize image array to .npy format in memory
+    buf = io.BytesIO()
+    # Save raw array (includes dtype & shape)
+    np.save(buf, image)
+    return buf.getvalue()
 
 
 class Pi0Client:
