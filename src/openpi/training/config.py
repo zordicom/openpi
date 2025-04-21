@@ -398,6 +398,75 @@ class LeRobotGalaxeaDataConfig(DataConfigFactory):
 
 
 @dataclasses.dataclass(frozen=True)
+class LeRobotXArmDataConfig(DataConfigFactory):
+    """
+    Data configuration for the bimanual xarm robot.
+    """
+
+    # If true, will convert joint dimensions to deltas with respect to the current state before passing to the model.
+    # Gripper dimensions will remain in absolute values.
+    use_delta_joint_actions: bool = True
+    # If provided, will be injected into the input data if the "prompt" key is not present.
+    default_prompt: str | None = "pick the ripe strawberry"
+
+    # Repack transforms.
+    repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
+        default=_transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        # Map dataset columns to expected structure
+                        "images": {
+                            "base_0_rgb": "observation.images.static_top",
+                            "left_wrist_0_rgb": "observation.images.eoat_left_top",
+                            "right_wrist_0_rgb": "observation.images.eoat_right_bottom",
+                        },
+                        "state": "observation.state",
+                        "actions": "action",
+                    }
+                )
+            ]
+        )
+    )
+
+    # Action keys that will be used to read the action sequence from the dataset.
+    action_sequence_keys: Sequence[str] = ("action",)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        # Import here to avoid circular import
+        import openpi.policies.xarm_policy as xarm_policy
+
+        data_transforms = _transforms.Group(
+            inputs=[xarm_policy.XArmInputs(action_dim=model_config.action_dim)],
+            outputs=[xarm_policy.XArmOutputs()],
+        )
+
+        if self.use_delta_joint_actions:
+            # Apply delta transform to joints but not grippers
+            delta_action_mask = _transforms.make_bool_mask(7, -1, 7, -1)
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
+
+        # Create base config and set local_files_only in it
+        base_config = self.create_base_config(assets_dirs)
+        base_config = dataclasses.replace(base_config, local_files_only=True)
+
+        return dataclasses.replace(
+            base_config,
+            repack_transforms=self.repack_transforms,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
+            prompt_from_task=True,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
 class TrainConfig:
     # Name of the config. Must be unique. Will be used to reference this config.
     name: tyro.conf.Suppress[str]
@@ -732,6 +801,40 @@ _CONFIGS = [
         save_interval=500,
         keep_period=1000,
         wandb_enabled=True,
+    ),
+    # Custom config for bimanual xarm dataset
+    TrainConfig(
+        name="pi0_xarm",
+        exp_name="xarm_harvesting",
+        model=pi0.Pi0Config(
+            # Use LoRA for fine-tuning
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "s3://openpi-assets/checkpoints/pi0_base/params",
+        ),
+        # Turn off EMA for LoRA fine-tuning
+        ema_decay=None,
+        # Use the freeze filter from the model config for LoRA
+        freeze_filter=pi0.Pi0Config(
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        data=LeRobotXArmDataConfig(
+            repo_id="zordicom/xarm_harvesting",
+            root=os.environ["DATASET_PATH"],  # Use absolute path to local dataset
+            default_prompt="pick the ripe strawberry",
+            use_delta_joint_actions=True,
+            # local_files_only is now set in the create() method
+        ),
+        batch_size=16,
+        num_workers=4,
+        num_train_steps=50_001,
+        log_interval=100,
+        save_interval=500,
+        keep_period=1000,
+        wandb_enabled=False,
     ),
     #
     # Debugging configs.
