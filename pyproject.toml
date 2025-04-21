@@ -15,7 +15,7 @@ dependencies = [
     "fsspec[gcs]>=2024.6.0",
     "gym-aloha>=0.1.1",
     "imageio>=2.36.1",
-    "jax[cuda12]==0.5.0",
+    "jax[cuda12]==0.5.3",
     "jaxtyping==0.2.36",
     "lerobot",
     "ml_collections==1.0.0",
