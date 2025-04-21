@@ -834,7 +834,7 @@ _CONFIGS = [
         log_interval=100,
         save_interval=500,
         keep_period=1000,
-        wandb_enabled=False,
+        wandb_enabled=True,
     ),
     #
     # Debugging configs.
