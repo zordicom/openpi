@@ -828,7 +828,7 @@ _CONFIGS = [
             use_delta_joint_actions=True,
             # local_files_only is now set in the create() method
         ),
-        batch_size=16,
+        batch_size=32,
         num_workers=4,
         num_train_steps=50_001,
         log_interval=100,
