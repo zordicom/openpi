@@ -17,7 +17,7 @@ dependencies = [
     "imageio>=2.36.1",
     "jax[cuda12]==0.5.3",
     "jaxtyping==0.2.36",
-    "lerobot",
+    "lerobot>=0.1.0",
     "ml_collections==1.0.0",
     "numpy>=1.26.4",
     "numpydantic>=1.6.6",
@@ -58,7 +58,6 @@ dev = [
 
 [tool.uv.sources]
 openpi-client = { workspace = true }
-lerobot = { git = "https://github.com/huggingface/lerobot", rev = "a445d9c9da6bea99a8972daa4fe1fdd053d711d2" }
 
 [tool.uv.workspace]
 members = ["packages/*"]
