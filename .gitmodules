@@ -4,3 +4,6 @@
 [submodule "third_party/libero"]
 	path = third_party/libero
 	url = https://github.com/Lifelong-Robot-Learning/LIBERO.git
+[submodule "third_party/zordi_policy_rpc"]
+	path = third_party/zordi_policy_rpc
+	url = git@github.com:zordicom/zordi_policy_rpc.git
