@@ -7,9 +7,9 @@ models:
     description: "PI05 model with full 33-dimensional action space"
     model_type: "pi05"
     paths:
-      model: "/home/zordi/openpi/pi_data/may21/6000/model"
+      model: "/home/zordi/openpi/pi0/model_checkpoints/may21/6000/model"
       processor_name: "zordi_pick_strawberry_may20"
-      tokenizer: "/home/zordi/openpi/pi_data/may21/paligemma_tokenizer.model"
+      tokenizer: "/home/zordi/openpi/pi0/model_checkpoints/may21/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"  # or "sample_tokens"
       use_diffusion: true
@@ -101,4 +101,4 @@ images:
   cameras:
     - "static_center_rgb"
     - "eoat_left_bottom_rgb"
-    - "eoat_right_bottom_rgb" 
+    - "eoat_right_bottom_rgb"
