@@ -805,7 +805,7 @@ _CONFIGS = [
     # Custom config for bimanual xarm dataset
     TrainConfig(
         name="pi0_xarm",
-        exp_name="xarm_harvesting",
+        exp_name="xarm_harvesting_right_arm_only",
         model=pi0.Pi0Config(
             # Use LoRA for fine-tuning
             paligemma_variant="gemma_2b_lora",
