@@ -7,9 +7,9 @@ models:
     description: "PI05 model with full 33-dimensional action space"
     model_type: "pi05"
     paths:
-      model: "/home/zordi/openpi/pi_data/may21/6000/model"
+      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21/6000/model"
       processor_name: "zordi_pick_strawberry_may20"
-      tokenizer: "/home/zordi/openpi/pi_data/may21/paligemma_tokenizer.model"
+      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"  # or "sample_tokens"
       use_diffusion: true
@@ -18,10 +18,24 @@ models:
         denoising_schedule_exponent: 1.0
     action_space:
       dimensions: 33
-      slicing: null  # Use full action space
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        left_arm_tool_pose: [8, 15]   # 7 dims
+        right_arm_joints: [15, 22]  # 7 dims
+        right_arm_gripper: [22, 23]
+        right_arm_tool_pose: [23, 30]  # 7 dims
+        right_arm_tool_to_goal_position: [30, 33]  # 3 dims
     state_space:
       dimensions: 33
-      slicing: null  # Use full state space
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        left_arm_tool_pose: [8, 15]   # 7 dims
+        right_arm_joints: [15, 22]  # 7 dims
+        right_arm_gripper: [22, 23]
+        right_arm_tool_pose: [23, 30]  # 7 dims
+        right_arm_tool_to_goal_position: [30, 33]  # 3 dims
     loading_method: "restore_exported"
 
   pi0_ee:
@@ -29,9 +43,9 @@ models:
     description: "PI0 model with 16-dimensional end-effector action space"
     model_type: "pi0"
     paths:
-      model: "/home/zordi/openpi/pi_data/may21_pi0_ee/6000/model"
+      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/6000/model"
       processor_name: "zordi_pick_strawberry_may20_ee"
-      tokenizer: "/home/zordi/openpi/pi_data/may21_pi0_ee/paligemma_tokenizer.model"
+      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"
       use_diffusion: false
@@ -41,17 +55,17 @@ models:
       dimensions: 16
       # Slices: (left_gripper, left_pose, right_gripper, right_pose)
       slicing:
-        - [7, 8]    # left gripper
-        - [8, 15]   # left pose (7 dims)
-        - [22, 23]  # right gripper
-        - [23, 30]  # right pose (7 dims)
+        left_arm_gripper: [7, 8]
+        left_arm_tool_pose: [8, 15]   # 7 dims
+        right_arm_gripper: [22, 23]
+        right_arm_tool_pose: [23, 30]  # 7 dims
     state_space:
       dimensions: 16
       slicing:
-        - [7, 8]    # left gripper
-        - [8, 15]   # left pose
-        - [22, 23]  # right gripper
-        - [23, 30]  # right pose
+        left_arm_gripper: [7, 8]
+        left_arm_tool_pose: [8, 15]   # 7 dims
+        right_arm_gripper: [22, 23]
+        right_arm_tool_pose: [23, 30]  # 7 dims
     loading_method: "exported_model"
 
   pi0_joint:
@@ -59,9 +73,9 @@ models:
     description: "PI0 model with 16-dimensional joint action space"
     model_type: "pi0"
     paths:
-      model: "/home/zordi/openpi/pi_data/may21_pi0_joint/6000/model"
+      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_joint/6000/model"
       processor_name: "zordi_pick_strawberry_may20_joint"
-      tokenizer: "/home/zordi/openpi/pi_data/may21_pi0_ee/paligemma_tokenizer.model"
+      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"
       use_diffusion: false
@@ -71,17 +85,17 @@ models:
       dimensions: 16
       # Slices: (left_joints, left_gripper, right_joints, right_gripper)
       slicing:
-        - [0, 7]    # left joints (7 dims)
-        - [7, 8]    # left gripper
-        - [15, 22]  # right joints (7 dims)
-        - [22, 23]  # right gripper
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
     state_space:
       dimensions: 16
       slicing:
-        - [0, 7]    # left joints
-        - [7, 8]    # left gripper
-        - [15, 22]  # right joints
-        - [22, 23]  # right gripper
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
     loading_method: "exported_model"
 
 # Default model to use
@@ -101,4 +115,4 @@ images:
   cameras:
     - "static_center_rgb"
     - "eoat_left_bottom_rgb"
-    - "eoat_right_bottom_rgb" 
+    - "eoat_right_bottom_rgb"

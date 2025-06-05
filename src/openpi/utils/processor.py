@@ -17,7 +17,7 @@ from openpi.utils.processor_utils import (
 from openpi.utils.image_utils import dummy_image_like, encode_str, decode_str
 import sentencepiece
 from openpi.utils.processor_utils import kw_dataclass
-from openpi.utils.processor_utils import Batch, RAW_TEXT, PALIGEMMA_TOKENIZER_PATH
+from openpi.utils.processor_utils import Batch, RAW_TEXT
 
 
 class LiveTransformation:
@@ -328,8 +328,10 @@ class TokenizeForPaligemmaEncoder:
 
     def _load_tokenizer(self):
         if self._tokenizer is None:
-            # Use the tokenizer path from PaligemmaFormatter if set
-            tokenizer_path = getattr(PaligemmaFormatter, "tokenizer_path", PALIGEMMA_TOKENIZER_PATH)
+            # Get the tokenizer path from the model config
+            tokenizer_path = getattr(PaligemmaFormatter, "tokenizer_path", None)
+            if tokenizer_path is None:
+                raise ValueError("tokenizer_path must be set in PaligemmaFormatter before using the tokenizer")
             self._tokenizer = sentencepiece.SentencePieceProcessor(tokenizer_path)
 
     def process(self, inputs: Batch, outputs: Batch) -> tuple[Batch, Batch]:

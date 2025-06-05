@@ -50,7 +50,7 @@ def main():
     """Main function to test the PI0 server with a WebSocket client."""
     parser = argparse.ArgumentParser(description="PI0 WebSocket Client")
     parser.add_argument("--host", default="localhost", help="Server host")
-    parser.add_argument("--port", type=int, default=8765, help="Server port")
+    parser.add_argument("--port", type=int, default=10012, help="Server port")
     parser.add_argument("--instruction", default="pick the ripe strawberry", help="Instruction to send")
     args = parser.parse_args()
 
@@ -77,6 +77,7 @@ def main():
         print(f"  - Observation length: {metadata.observation_length}")
         print(f"  - Time delta: {metadata.timedelta_sec}s")
         print(f"  - Image encoders: {len(metadata.image_descriptions)}")
+        print(f"  - Metadata: {metadata}")
 
         # Get image dimensions from metadata
         img_desc = list(metadata.image_descriptions.values())[0]
@@ -106,7 +107,7 @@ def main():
                 encoded_images[img_id] = [encode_image(img, img_height, img_width)]
 
         # Example state vector (33D)
-        state = [0.0] * 33
+        state = [0.0] * 16
 
         # Request action
         print("\nRequesting action from server...")

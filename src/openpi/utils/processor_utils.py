@@ -9,7 +9,6 @@ import jax
 import numpy as np
 import logging
 from typing import Any
-from jax._src.export.shape_poly import _DimExpr
 import frozendict
 import sentencepiece
 import sentencepiece.sentencepiece_model_pb2
@@ -18,7 +17,6 @@ import sentencepiece.sentencepiece_model_pb2
 SPProcessor = sentencepiece.SentencePieceProcessor
 SPModelProto = sentencepiece.sentencepiece_model_pb2.ModelProto
 kw_dataclass = dataclasses.dataclass(kw_only=True)
-PALIGEMMA_TOKENIZER_PATH = "/home/zordi/openpi/pi_data/may21/paligemma_tokenizer.model"
 
 PROCESSORS = "processors"
 PROCESS = "process"
@@ -478,7 +476,7 @@ class SentencepieceFormatter:
     tokenizer_name: str | None = None
     replacements: Any | None = None
     _processor: Any | None = None
-    tokenizer_path: str | None = PALIGEMMA_TOKENIZER_PATH
+    tokenizer_path: str | None = "/home/zordi/zordi_ws/openpi/pi0/paligemma_tokenizer.model"
 
     def __repr__(self):
         return f"{self.__class__.__name__}(tokenizer_name={self.tokenizer_name})"
@@ -487,6 +485,8 @@ class SentencepieceFormatter:
     def processor(self):
         assert self.tokenizer_name is not None
         if self._processor is None:
+            if self.tokenizer_path is None:
+                raise ValueError("tokenizer_path must be set before using the processor")
             self._processor = load_tokenizer_for_model(self.tokenizer_path, self.tokenizer_name, self.replacements)
         return self._processor
 

@@ -8,15 +8,11 @@ import sys
 import types
 import yaml
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-import logging
-from collections import defaultdict
+from typing import Dict, List, Optional, Union
 
 import cv2
 import jax
 import numpy as np
-import orbax.checkpoint as ocp
-import sentencepiece
 from zordi_policy_rpc.image_transforms import ImageEncoder, ImageId, ResizeAndEncodeV1
 from zordi_policy_rpc.server.interface import ActionServer
 from zordi_policy_rpc.transport import (
@@ -34,7 +30,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 from openpi.utils.image_utils import resize_with_pad
 from openpi.utils.model_serializer import restore_exported
-from openpi.utils.processor_utils import load_processor, spec_select, make_batch, unmake_batch
+from openpi.utils.processor_utils import load_processor, spec_select, make_batch
 from openpi.utils.exported_model import ExportedModel
 from openpi.utils.processor import (
     DiscretizeStates,
@@ -210,35 +206,62 @@ class ConfigurablePI0ActionServer(ActionServer):
         print("Initializing field mappings...")
 
         # Get dimensions from config
-        state_dim = self.model_config["state_space"]["dimensions"]
-        action_dim = self.model_config["action_space"]["dimensions"]
+        self.state_dim = self.model_config["state_space"]["dimensions"]
+        self.action_dim = self.model_config["action_space"]["dimensions"]
 
-        # For full models, use simple mapping
-        self.state_fields = {"observation/state": (0, state_dim)}
-        self.action_fields = {"actions": (0, action_dim)}
+        # Initialize fields dictionaries
+        self.state_fields = {}
+        self.action_fields = {}
 
         # Store slicing configuration
         self.state_slicing = self.model_config["state_space"].get("slicing")
         self.action_slicing = self.model_config["action_space"].get("slicing")
 
-        print(f"State dimensions: {state_dim}, slicing: {self.state_slicing}")
-        print(f"Action dimensions: {action_dim}, slicing: {self.action_slicing}")
+        # Create state fields from slicing configuration
+        if self.state_slicing:
+            for component_name, (start, end) in self.state_slicing.items():
+                self.state_fields[component_name] = (start, end)
 
-    def _slice_array(self, array: np.ndarray, slicing_config: Optional[List[List[int]]]) -> np.ndarray:
-        """Apply slicing configuration to an array."""
+        # Create action fields from slicing configuration
+        if self.action_slicing:
+            for component_name, (start, end) in self.action_slicing.items():
+                self.action_fields[component_name] = (start, end)
+
+        print(f"State dimensions: {self.state_dim}, fields: {self.state_fields}")
+        print(f"Action dimensions: {self.action_dim}, fields: {self.action_fields}")
+
+    def _slice_array(self, array: np.ndarray, slicing_config: Optional[Dict[str, List[int]]]) -> np.ndarray:
+        """Apply slicing configuration to an array.
+        
+        Args:
+            array: Input array to slice
+            slicing_config: Dictionary mapping component names to [start, end] indices
+            
+        Returns:
+            Concatenated array of sliced components
+        """
         if slicing_config is None:
             return array
 
         sliced_parts = []
-        for start, end in slicing_config:
+        for component_name, (start, end) in slicing_config.items():
             sliced_parts.append(array[..., start:end])
 
         return np.concatenate(sliced_parts, axis=-1)
 
     def _unslice_array(
-        self, sliced_array: np.ndarray, slicing_config: Optional[List[List[int]]], full_size: int = 33
+        self, sliced_array: np.ndarray, slicing_config: Optional[Dict[str, List[int]]], full_size: int = 33
     ) -> np.ndarray:
-        """Reconstruct full array from sliced array."""
+        """Reconstruct full array from sliced array.
+        
+        Args:
+            sliced_array: Input array to unslice
+            slicing_config: Dictionary mapping component names to [start, end] indices
+            full_size: Size of the full output array
+            
+        Returns:
+            Full array with sliced components placed in their original positions
+        """
         if slicing_config is None:
             return sliced_array
 
@@ -247,7 +270,7 @@ class ConfigurablePI0ActionServer(ActionServer):
 
         # Fill in the sliced parts
         slice_idx = 0
-        for start, end in slicing_config:
+        for component_name, (start, end) in slicing_config.items():
             slice_len = end - start
             full_array[..., start:end] = sliced_array[..., slice_idx : slice_idx + slice_len]
             slice_idx += slice_len
@@ -413,7 +436,7 @@ class ConfigurablePI0ActionServer(ActionServer):
 
             for i in range(num_actions_to_use):
                 # Unslice actions if needed (to full 33-dim)
-                action = self._unslice_array(raw_predicted_action[i], self.action_slicing)
+                action = self._unslice_array(raw_predicted_action[i], self.action_slicing, self.action_dim)
 
                 rpc_policy_actions.append(
                     PolicyAction(

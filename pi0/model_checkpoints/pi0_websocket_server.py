@@ -26,7 +26,7 @@ async def main():
     """Main async function to run the WebSocket server."""
     parser = argparse.ArgumentParser(description="PI0 WebSocket Server")
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
-    parser.add_argument("--port", type=int, default=8765, help="Port to bind to")
+    parser.add_argument("--port", type=int, default=10012, help="Port to bind to")
     parser.add_argument("--config", default="model_configs.yaml", help="Path to model configuration file")
     parser.add_argument("--model", help="Model name to load (if not specified, uses default from config)")
     args = parser.parse_args()
