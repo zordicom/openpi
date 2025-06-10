@@ -442,7 +442,7 @@ class ConfigurablePI0ActionServer(ActionServer):
 
             for i in range(num_actions_to_use):
                 # Unslice actions if needed (to full size based on slicing config)
-                action = self._unslice_array(raw_predicted_action[i], self.action_fields, self.control_config["action_space"]["dimensions"])
+                action = self._unslice_array(raw_predicted_action[i], self.action_fields, self.model_config["action_space"]["dimensions"])
 
                 rpc_policy_actions.append(
                     PolicyAction(

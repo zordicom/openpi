@@ -30,7 +30,7 @@ import sentencepiece
 import tqdm
 
 # Download from s3://zordi/paligemma_tokenizer.model
-_TOKENIZER_PATH = "../../paligemma_tokenizer.model"
+_TOKENIZER_PATH = "/home/zordi/openpi/pi0/paligemma_tokenizer.model"
 
 PROCESSORS = "processors"
 PROCESS = "process"

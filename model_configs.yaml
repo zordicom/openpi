@@ -7,9 +7,9 @@ models:
     description: "PI05 model with full 33-dimensional action space"
     model_type: "pi05"
     paths:
-      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21/6000/model"
+      model: "/home/zordi/openpi/pi0/model_checkpoints/may21/6000/model"
       processor_name: "zordi_pick_strawberry_may20"
-      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21/paligemma_tokenizer.model"
+      tokenizer: "/home/zordi/openpi/pi0/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"  # or "sample_tokens"
       use_diffusion: true
@@ -43,9 +43,9 @@ models:
     description: "PI0 model with 16-dimensional end-effector action space"
     model_type: "pi0"
     paths:
-      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/6000/model"
+      model: "/home/zordi/openpi/pi0/model_checkpoints/may21_pi0_ee/6000/model"
       processor_name: "zordi_pick_strawberry_may20_ee"
-      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
+      tokenizer: "/home/zordi/openpi/pi0/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"
       use_diffusion: false
@@ -73,9 +73,9 @@ models:
     description: "PI0 model with 16-dimensional joint action space"
     model_type: "pi0"
     paths:
-      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_joint/6000/model"
+      model: "/home/zordi/openpi/pi0/model_checkpoints/may21_pi0_joint/6000/model"
       processor_name: "zordi_pick_strawberry_may20_joint"
-      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
+      tokenizer: "/home/zordi/openpi/pi0/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"
       use_diffusion: false
