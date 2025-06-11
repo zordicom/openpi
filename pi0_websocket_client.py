@@ -15,14 +15,14 @@ from pathlib import Path
 # Add the current directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from third_party.zordi_policy_rpc.src.zordi_policy_rpc.client.websocket import WebSocketClient
-from third_party.zordi_policy_rpc.src.zordi_policy_rpc.client.interface import (
+from zordi_policy_rpc.client.websocket import WebSocketClient
+from zordi_policy_rpc.client.interface import (
     ActionRequest,
     BimanualPair,
     Pose,
     Position,
 )
-from third_party.zordi_policy_rpc.src.zordi_policy_rpc.image_transforms import ImageId
+from zordi_policy_rpc.image_transforms import ImageId
 
 
 def encode_image(image: np.ndarray, target_height: int, target_width: int) -> np.ndarray:

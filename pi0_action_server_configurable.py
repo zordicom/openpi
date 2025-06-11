@@ -16,10 +16,9 @@ import cv2
 import jax
 import numpy as np
 import orbax.checkpoint as ocp
-import sentencepiece
-from third_party.zordi_policy_rpc.src.zordi_policy_rpc.image_transforms import ImageEncoder, ImageId, ResizeAndEncodeV1
-from third_party.zordi_policy_rpc.src.zordi_policy_rpc.server.interface import ActionServer
-from third_party.zordi_policy_rpc.src.zordi_policy_rpc.transport import (
+from zordi_policy_rpc.image_transforms import ImageEncoder, ImageId, ResizeAndEncodeV1
+from zordi_policy_rpc.server.interface import ActionServer
+from zordi_policy_rpc.transport import (
     GetPolicyActionRequest,
     GetPolicyActionResponse,
     GetPolicyMetadataRequest,
@@ -27,7 +26,7 @@ from third_party.zordi_policy_rpc.src.zordi_policy_rpc.transport import (
     PolicyAction,
     ServerError,
 )
-from third_party.zordi_policy_rpc.src.zordi_policy_rpc.vectors import VectorAsFieldsFactory
+from zordi_policy_rpc.vectors import VectorAsFieldsFactory
 
 # Add the src directory to Python path so we can import from openpi.utils
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
@@ -75,6 +74,9 @@ create_dummy_module("monopi.lib.py.ml.tokenizer", "PaligemmaFormatter", Paligemm
 # Constants
 RAW_TEXT = "raw_text"
 ROBOT_TASK_STRING = "robot_task_string"
+task_to_language_raw_text = {
+    "dataset": "pick the ripe strawberry",
+}
 
 
 class ConfigurablePI0ActionServer(ActionServer):
@@ -375,10 +377,8 @@ class ConfigurablePI0ActionServer(ActionServer):
                 if img is None:
                     print(f"ERROR: Failed to decode image for {obs_key}")
                     continue
-
-                # Convert BGR to RGB
-                if img.ndim == 3 and img.shape[2] == 3:
-                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+               
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
                 # Resize and pad image
                 img = resize_with_pad(img, self.image_config["height"], self.image_config["width"])
