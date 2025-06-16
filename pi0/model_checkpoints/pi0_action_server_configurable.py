@@ -14,7 +14,7 @@ import cv2
 import jax
 import numpy as np
 from zordi_policy_rpc.image_transforms import ImageEncoder, ImageId, ResizeAndEncodeV1
-from zordi_policy_rpc.server.interface import ActionServer
+from zordi_policy_rpc.policy.server.interface import ActionServer
 from zordi_policy_rpc.transport import (
     GetPolicyActionRequest,
     GetPolicyActionResponse,
@@ -386,7 +386,8 @@ class ConfigurablePI0ActionServer(ActionServer):
             print(f"✓ Processed {images_processed} images")
 
             # Add text instruction
-            raw_text = "pick the ripe strawberry"  # Could be made configurable
+            # raw_text = "pick the ripe strawberry"  # Could be made configurable
+            raw_text = "be a good robot"
             outgoing_step[RAW_TEXT] = raw_text
             outgoing_step[ROBOT_TASK_STRING] = raw_text
             print(f"✓ Added instruction: '{raw_text}'")

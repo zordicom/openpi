@@ -55,17 +55,17 @@ models:
       dimensions: 16
       # Slices: (left_gripper, left_pose, right_gripper, right_pose)
       slicing:
+        left_arm_tool_pose: [0, 7]   # 7 dims
         left_arm_gripper: [7, 8]
-        left_arm_tool_pose: [8, 15]   # 7 dims
-        right_arm_gripper: [22, 23]
-        right_arm_tool_pose: [23, 30]  # 7 dims
+        right_arm_tool_pose: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
     state_space:
       dimensions: 16
       slicing:
+        left_arm_tool_pose: [0, 7]   # 7 dims
         left_arm_gripper: [7, 8]
-        left_arm_tool_pose: [8, 15]   # 7 dims
-        right_arm_gripper: [22, 23]
-        right_arm_tool_pose: [23, 30]  # 7 dims
+        right_arm_tool_pose: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
     loading_method: "exported_model"
 
   pi0_joint:
@@ -97,6 +97,98 @@ models:
         right_arm_joints: [8, 15]  # 7 dims
         right_arm_gripper: [15, 16]
     loading_method: "exported_model"
+
+  pi0_joint_2k:
+    name: "PI0 Joint Space 2k"
+    description: "PI0 model with 16-dimensional joint action space, trained on 2k steps"
+    model_type: "pi0"
+    paths:
+      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/pi0_joint_may20/4000/model"
+      processor_name: "zordi_pick_strawberry_may20_joint"
+      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
+    inference:
+      function: "sample_actions"
+      use_diffusion: false
+      sampling_kwargs:
+        num_steps: 10
+    action_space:
+      dimensions: 16
+      # Slices: (left_joints, left_gripper, right_joints, right_gripper)
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
+    state_space:
+      dimensions: 16
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
+    loading_method: "exported_model"
+
+  pi0_joint_jun14_10k:
+    name: "PI0 Joint Space Jun14 10k"
+    description: "PI0 model with 16-dimensional joint action space, trained on 10k steps"
+    model_type: "pi0"
+    paths:
+      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/pi0_joint_jun14/10000/model"
+      processor_name: "zordi_pick_strawberry_jun14_joint"
+      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
+    inference:
+      function: "sample_actions"
+      use_diffusion: false
+      sampling_kwargs:
+        num_steps: 10
+    action_space:
+      dimensions: 16
+      # Slices: (left_joints, left_gripper, right_joints, right_gripper)
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
+    state_space:
+      dimensions: 16
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
+    loading_method: "exported_model"
+
+  pi0_joint_jun14_20k:
+    name: "PI0 Joint Space Jun14 20k"
+    description: "PI0 model with 16-dimensional joint action space, trained on 20k steps"
+    model_type: "pi0"
+    paths:
+      model: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/pi0_joint_jun14/20000/model"
+      processor_name: "zordi_pick_strawberry_jun14_joint"
+      tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
+    inference:
+      function: "sample_actions"
+      use_diffusion: false
+      sampling_kwargs:
+        num_steps: 10
+    action_space:
+      dimensions: 16
+      # Slices: (left_joints, left_gripper, right_joints, right_gripper)
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
+    state_space:
+      dimensions: 16
+      slicing:
+        left_arm_joints: [0, 7]    # 7 dims
+        left_arm_gripper: [7, 8]
+        right_arm_joints: [8, 15]  # 7 dims
+        right_arm_gripper: [15, 16]
+    loading_method: "exported_model"
+
+
 
 # Default model to use
 default_model: "pi05_full"

@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from pi0_action_server_configurable import ConfigurablePI0ActionServer
-from zordi_policy_rpc.server.websocket import WebSocketServer
+from zordi_policy_rpc.policy.server.websocket import WebSocketServer
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
