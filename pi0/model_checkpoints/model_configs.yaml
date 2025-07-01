@@ -38,6 +38,33 @@ models:
         right_arm_tool_to_goal_position: [30, 33]  # 3 dims
     loading_method: "restore_exported"
 
+  pi05_jun21_right_only:
+    name: "PI05 Full Action Space"
+    description: "PI05 model with joint action space"
+    model_type: "pi05"
+    paths:
+      model: "/home/allen/workspace/openpi/pi0/model_checkpoints/zordi_jun21_joint_right_arm_only_very_low_gemma_loss/10000/model"
+      processor_name: "zordi_jun13data_joint_right_arm_only"
+      tokenizer: "/home/allen/workspace/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
+    inference:
+      function: "sample_actions"  # or "sample_tokens"
+      use_diffusion: true
+      sampling_kwargs:
+        num_denoising_steps: 10
+        denoising_schedule_exponent: 1.0
+    action_space:
+      dimensions: 8
+      # Slices: (right_joints, right_gripper)
+      slicing:
+        right_arm_joints: [0, 7]  # 7 dims
+        right_arm_gripper: [7, 8]
+    state_space:
+      dimensions: 8
+      slicing:
+        right_arm_joints: [0, 7]  # 7 dims
+        right_arm_gripper: [7, 8]
+    loading_method: "restore_exported"
+
   pi0_ee:
     name: "PI0 End-Effector Space"
     description: "PI0 model with 16-dimensional end-effector action space"
