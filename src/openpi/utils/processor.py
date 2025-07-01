@@ -180,7 +180,7 @@ class ToInterleaved(LiveTransformation):
     tokens_per_action: int
     tokenizer: Any = dataclasses.field(default_factory=PaligemmaFormatter)
 
-    _tokenizer: Any
+    _tokenizer: Any = None
     add_future_image: bool = False
     condition_on_future_image: bool = False
     include_image_delimiters: bool = False
