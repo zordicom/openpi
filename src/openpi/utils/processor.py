@@ -117,6 +117,16 @@ class PredictDCTActions(LiveTransformation):
     include_diffusion: bool = True
     pad_output_token: int = 300
 
+    add_future_image: bool = False
+    ar_predict_future_image: bool = False
+    condition_on_future_image: bool = False
+    drop_task_prob: float = 0.0
+    include_critic_value: bool = False
+    load_only_future_base_image: bool = False
+    mask_dct_token_loss: bool = False
+    tokenizer: Any = dataclasses.field(default_factory=PaligemmaFormatter)
+    with_ar_prefix: bool = False
+
     def process(self, inputs, outputs):
         bs = len(inputs["raw_text"])
         inputs["modalities"] = []
@@ -169,6 +179,17 @@ class ToInterleaved(LiveTransformation):
     tokens_per_image: int
     tokens_per_action: int
     tokenizer: Any = dataclasses.field(default_factory=PaligemmaFormatter)
+
+    _tokenizer: Any
+    add_future_image: bool = False
+    condition_on_future_image: bool = False
+    include_image_delimiters: bool = False
+    latent_queries_per_image_chunk: Any = None
+    log_modalities_to_html_str: bool = True
+    logging_loss_groups: Any = None
+    max_language_inference_injection_length: Any = None
+    max_num_future_images: int = 4
+    max_num_image_chunks: Any = None
 
     def process_example(self, modalities, image_dict, inference=False):
         image_names = [k for k in image_dict if not k.endswith("mask")]

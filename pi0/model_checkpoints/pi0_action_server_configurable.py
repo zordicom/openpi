@@ -68,6 +68,20 @@ create_dummy_module("monopi.model.processors.interleaved_examples", "PredictDCTA
 create_dummy_module("monopi.model.processors.interleaved", "ToInterleaved", ToInterleaved)
 create_dummy_module("monopi.lib.py.ml.tokenizer", "PaligemmaFormatter", PaligemmaFormatter)
 
+
+def fake_fn(*args, **kwargs):
+    pass
+
+
+class fakemodule:
+    DCTTokenizer = fake_fn
+
+
+sys.modules["monopi.model"] = fakemodule
+sys.modules["monopi.model.processors"] = fakemodule
+sys.modules["monopi.model.processors.dct_tokenizers"] = fakemodule
+sys.modules["monopi.model.processors.dct_tokenizers.tokenizer"] = fakemodule
+
 # Constants
 RAW_TEXT = "raw_text"
 ROBOT_TASK_STRING = "robot_task_string"
