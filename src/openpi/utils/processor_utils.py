@@ -33,7 +33,7 @@ def spec_select(batch: Batch, spec: set) -> Batch:
     """Helper function to pick out desired fields based on spec."""
     for k in spec:
         if k not in batch:
-            raise ValueError(f"Field {k} not found in batch {spec=}")
+            raise ValueError(f"Field {k} not found in batch {batch.keys()=}")
     return {k: batch[k] for k in spec}
 
 

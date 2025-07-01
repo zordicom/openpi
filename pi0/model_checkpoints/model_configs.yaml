@@ -165,7 +165,7 @@ models:
       tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"
-      use_diffusion: false
+      use_diffusion: true
       sampling_kwargs:
         num_steps: 10
     action_space:
@@ -195,7 +195,7 @@ models:
       tokenizer: "/home/zordi/zordi_ws/openpi/pi0/model_checkpoints/may21_pi0_ee/paligemma_tokenizer.model"
     inference:
       function: "sample_actions"
-      use_diffusion: false
+      use_diffusion: true
       sampling_kwargs:
         num_steps: 10
     action_space:
