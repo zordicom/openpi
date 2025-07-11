@@ -190,6 +190,7 @@ class ToInterleaved(LiveTransformation):
     max_language_inference_injection_length: Any = None
     max_num_future_images: int = 4
     max_num_image_chunks: Any = None
+    max_num_critic_values: Any = None
 
     def process_example(self, modalities, image_dict, inference=False):
         image_names = [k for k in image_dict if not k.endswith("mask")]
