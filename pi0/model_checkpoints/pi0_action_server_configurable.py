@@ -400,8 +400,7 @@ class ConfigurablePI0ActionServer(ActionServer):
             print(f"✓ Processed {images_processed} images")
 
             # Add text instruction
-            # raw_text = "pick the ripe strawberry"  # Could be made configurable
-            raw_text = "be a good robot"
+            raw_text = "pick the ripe strawberry"  # Could be made configurable
             outgoing_step[RAW_TEXT] = raw_text
             outgoing_step[ROBOT_TASK_STRING] = raw_text
             print(f"✓ Added instruction: '{raw_text}'")
